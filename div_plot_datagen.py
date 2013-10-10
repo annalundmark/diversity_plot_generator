@@ -18,8 +18,11 @@ def main(infile, min):
 		print "forward and reverse fastq file do not match"
 	print transcripts
 	subset_list = get_subsets(lines_fw, transcripts, min)
-	write_file(subset_list, fw, rw, experiment)
+	fw_files, rw_files = write_file(subset_list, fw, rw, experiment)
 
+
+#def check_sbatch():
+	
 
 def write_file(fastq_list, fw, rw, name):
 	i=1
@@ -30,7 +33,7 @@ def write_file(fastq_list, fw, rw, name):
 		print "Writing subset " + str(i) + ", corresponding to " + str(int(subset)) + " fastq lines to file"
 		p = subprocess.Popen(["head", "-n", str(int(subset)), fw], stdout=subprocess.PIPE)
 		out = p.communicate()
-		outfile = name + "_" + str(i) + "_R1.fastq"
+		outfile = fw[:-6] + "_" + str(i) + ".fastq"
 		file_handle = open(outfile, "w")
 		file_handle.write(repr(out))
 		file_handle.close()
@@ -38,17 +41,15 @@ def write_file(fastq_list, fw, rw, name):
 		
 		p = subprocess.Popen(["head", "-n", str(int(subset)), rw], stdout=subprocess.PIPE)
 		out = p.communicate()
-		outfile = name + "_" + str(i) + "_R2.fastq"
+		outfile = rw[:-6] + "_" + str(i) + ".fastq"
 		file_handle = open(outfile, "w")
 		file_handle.write(repr(out))
 		file_handle.close()
 		rw_files.append(outfile)
 		
 		i += 1
-		
-		print fw_files
-		print rw_files
 	
+	return fw_files, rw_files
 
 def get_lines(fastq_file): 
 	lines = commands.getoutput('wc -l "%s"' % (fastq_file))
